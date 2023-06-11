@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  first_name String
+  last_name  String
+  avatar_url String?
+  password   String
+  role_id    Int?
+  group_id   String?
+  role       role?    @relation(fields: [role_id], references: [id])
+  group      group?   @relation(fields: [group_id], references: [id])
+  updatedAt  DateTime @default(now()) @updatedAt
+  createdAt  DateTime @default(now())
+}
+
+model role {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  users       user[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now()) @updatedAt
+  permissions role_permission[]
+}
+
+model role_permission {
+  id            Int         @id @default(autoincrement())
+  role_id       Int?
+  permission_id Int?
+  role          role?       @relation(fields: [role_id], references: [id])
+  permission    permission? @relation(fields: [permission_id], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now()) @updatedAt
+}
+
+model permission {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  roles       role_permission[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now()) @updatedAt
+}
+
+model group {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  master_id   String?
+  users       user[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
