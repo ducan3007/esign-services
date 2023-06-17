@@ -25,7 +25,7 @@ export const config = convict({
   JWT_EXPIRATION_TIME: {
     doc: 'Expiration time for JWT',
     format: String,
-    default: '1d',
+    default: '10d',
     env: 'JWT_EXPIRATION_TIME'
   }
 })

@@ -4,17 +4,21 @@
  */
 
 import { Logger, ValidationPipe } from '@nestjs/common'
-import { NestFactory } from '@nestjs/core'
+import { HttpAdapterHost, NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { logger } from '@esign-services/logger'
 import { config } from '@esign-services/logger'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { GlobalExceptionsFilter } from './exceptions/global.exception'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const globalPrefix = 'api'
   app.setGlobalPrefix(globalPrefix)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
+
+  const httpAdapterHost = app.get(HttpAdapterHost)
+  app.useGlobalFilters(new GlobalExceptionsFilter(httpAdapterHost))
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestJS')
