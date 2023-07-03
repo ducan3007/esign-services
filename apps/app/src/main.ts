@@ -1,20 +1,15 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
-import { Logger, ValidationPipe } from '@nestjs/common'
+import { config, logger } from '@esign-services/logger'
+import { ValidationPipe } from '@nestjs/common'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import { HttpAdapterHost, NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
-import { logger } from '@esign-services/logger'
-import { config } from '@esign-services/logger'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { GlobalExceptionsFilter } from './exceptions/global.exception'
+import { AppModule } from './app.module'
+import { GlobalExceptionsFilter } from './exceptions/global_exception'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  const globalPrefix = 'api'
-  app.setGlobalPrefix(globalPrefix)
+  // app.disable('x-powered-by')
+  app.setGlobalPrefix('api')
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
 
   const httpAdapterHost = app.get(HttpAdapterHost)
@@ -31,8 +26,7 @@ async function bootstrap() {
 
   const port = config.get('PORT')
   await app.listen(port)
-
-  logger.info(`Listening at http://localhost:${port}/${globalPrefix}`)
+  logger.info(`Listening at http://localhost:${port}/${'api'}`)
 }
 
 bootstrap()

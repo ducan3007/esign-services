@@ -1,0 +1,1 @@
+export const $1KB = 1024

@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   validate(payload: unknown) {
-    logger.info(this.name.toString() + 'JWT Strategy validate %s' + JSON.stringify(payload))
+    // logger.info(this.name.toString() + 'JWT Strategy validate %s' + JSON.stringify(payload))
     return payload
   }
 }

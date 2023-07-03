@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { LoginDto, SignUpDto } from './dtos/auth.dto'
 import { ExceptionBadRequest } from '../../exceptions/controlled_exception'
 import { JwtService } from '@nestjs/jwt'
-import { UserService } from '../user/user.service'
+import { UserService } from '../users/user.service'
 
 @Injectable()
 export class AuthService {
@@ -64,7 +64,8 @@ export class AuthService {
     })
 
     return {
-      access_token: token
+      access_token: token,
+      user: user
     }
   }
 

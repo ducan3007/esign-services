@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common'
+import { RedisService } from './modules/redis/redis.service'
 
 @Injectable()
 export class AppService {
-  getData(): { message: string } {
-    return { message: 'Hello API' };
+  async getData() {
+    return { message: 'Hello API' }
   }
 }

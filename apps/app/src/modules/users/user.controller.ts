@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common'
+import { UserType } from '@esign-services/logger'
+import { Controller, Get, Param, UseGuards } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import { UserService } from './user.service'
 import { JwtAuthGuard } from '../auth/guard/jwt.guard'
 import { User, ValidateRequest } from '../auth/guard/validate_request.guard'
-import { UserType } from '@esign-services/logger'
+import { UserService } from './user.service'
 
 @ApiTags('User')
 @Controller('user')

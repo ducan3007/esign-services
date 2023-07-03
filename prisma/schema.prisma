@@ -40,7 +40,7 @@ model role {
 }
 
 // [User, Document, Sign Document, Certificate, Sign Template, Group ]
-model resource {
+model feature {
   id                       Int                        @id @default(autoincrement())
   name                     String                     @unique
   description              String?
@@ -55,7 +55,7 @@ model role_resource_permission {
   resource_id   Int?
   permission_id Int?
   role          role?     @relation(fields: [role_id], references: [id])
-  resource      resource? @relation(fields: [resource_id], references: [id])
+  feature      feature? @relation(fields: [resource_id], references: [id])
 }
 
 model user_role {
