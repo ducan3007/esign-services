@@ -17,10 +17,10 @@ import { IPFSModule } from './modules/ipfs/ipfs.module'
     PrismaModule,
     UserModule,
     RedisModule,
-    KafkaModule,
+    // KafkaModule,
+    // IPFSModule,
     SignatureModule,
-    DocumentModule,
-    IPFSModule
+    DocumentModule
   ],
   controllers: [AppController],
   providers: [AppService]

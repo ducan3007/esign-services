@@ -1,6 +1,6 @@
-import { Injectable, OnModuleInit, INestApplication, OnApplicationShutdown } from '@nestjs/common'
+import { config, logger } from '@esign-services/logger'
+import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common'
 import redis from 'ioredis'
-import { config } from '@esign-services/logger'
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnApplicationShutdown {
@@ -16,7 +16,10 @@ export class RedisService implements OnModuleInit, OnApplicationShutdown {
   }
 
   async onModuleInit() {
-    console.log('RedisService initialized')
+    logger.info('Redis Service Initiated', {
+      host: config.get('REDIS_HOST'),
+      port: config.get('REDIS_PORT')
+    })
   }
 
   async get(key: string) {

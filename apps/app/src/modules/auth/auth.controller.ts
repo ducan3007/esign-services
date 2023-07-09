@@ -15,7 +15,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Register' })
-  @Post('signup')
+  @Post('/signup')
   async sigup(@Body() body: SignUpDto) {
     return this.authService.sigup(body)
   }

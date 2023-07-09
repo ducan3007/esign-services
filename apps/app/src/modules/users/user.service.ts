@@ -1,4 +1,4 @@
-import { UserPermission, UserType } from '@esign-services/logger'
+import { UserPermission, UserType, logger } from '@esign-services/logger'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -27,7 +27,11 @@ export class UserService {
             }
           }
         },
-        blockchain_address: true,
+        wallet: {
+          select: {
+            public_key: true
+          }
+        },
         createdAt: true,
         updatedAt: true
       }
@@ -40,7 +44,7 @@ export class UserService {
       },
       select: {
         role_id: true,
-        feature: {
+        resource: {
           select: {
             name: true
           }
@@ -48,6 +52,8 @@ export class UserService {
         permission_id: true
       }
     })
+
+    logger.info('User permission', user_permission)
 
     return {
       id: user.id,
@@ -62,8 +68,16 @@ export class UserService {
         name: user.user_role[0].role.name,
         id: user.user_role[0].role.id
       },
-      permission: user_permission,
-      blockchain_address: user.blockchain_address,
+      permission: user_permission.map((perm) => {
+        return {
+          role_id: perm.role_id,
+          feature: {
+            name: perm.resource.name
+          },
+          permission_id: perm.permission_id
+        }
+      }),
+      wallet_address: user.wallet,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     }
@@ -92,7 +106,11 @@ export class UserService {
             }
           }
         },
-        blockchain_address: true,
+        wallet: {
+          select: {
+            public_key: true
+          }
+        },
         createdAt: true,
         updatedAt: true
       }
@@ -105,30 +123,5 @@ export class UserService {
     const map = {}
 
     user_permission.forEach((permission) => {})
-  }
-
-  /**
-   * How do we calculate permission?
-   *
-   *
-   *
-   * @param perm
-   * @returns
-   */
-  private calculatePermission(perm: any) {
-    const CREATE_MASK = 0b100000 // 32
-    const READ_MASK = 0b010000 // 16
-    const UPDATE_MASK = 0b001000 // 8
-    const DELETE_MASK = 0b000100 // 4
-    const VERIFIDOCUMENT_MASK = 0b000010 // 2
-
-    const value = perm & 0b111111111111
-
-    return {
-      create: (value & CREATE_MASK) === CREATE_MASK,
-      read: (value & READ_MASK) === READ_MASK,
-      update: (value & UPDATE_MASK) === UPDATE_MASK,
-      delete: (value & DELETE_MASK) === DELETE_MASK
-    }
   }
 }

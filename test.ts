@@ -1,11 +1,11 @@
-const CREATE_MASK = 0b1000000000
-const READ_MASK = 0b0100000000
-const UPDATE_MASK = 0b0010000000
-const DELETE_MASK = 0b0001000000
-const IMPERSONATE_MASK = 0b0000100000
-const VERIFY_DOCUMENT_MASK = 0b0000010000
-const SIGN_DOCUMENT_MASK = 0b0000001000
-const ASSIGN_MASK = 0b0000001000
+const CREATE_MASK = 2
+const READ_MASK = 4
+const UPDATE_MASK = 8
+const DELETE_MASK = 16
+const VERIFY_DOCUMENT_MASK = 32
+const SIGN_DOCUMENT_MASK = 64
+const ASSIGN_MASK = 128
+const ENABLE_MASK = 256
 
 function calculatePermission(perm: any) {
   const value = perm & 0b111111111111
@@ -15,43 +15,147 @@ function calculatePermission(perm: any) {
     read: (value & READ_MASK) === READ_MASK,
     update: (value & UPDATE_MASK) === UPDATE_MASK,
     delete: (value & DELETE_MASK) === DELETE_MASK,
-    impersonate: (value & IMPERSONATE_MASK) === IMPERSONATE_MASK,
-    verifyDocument: (value & VERIFY_DOCUMENT_MASK) === VERIFY_DOCUMENT_MASK
+    verifyDocument: (value & VERIFY_DOCUMENT_MASK) === VERIFY_DOCUMENT_MASK,
+    signDocument: (value & SIGN_DOCUMENT_MASK) === SIGN_DOCUMENT_MASK,
+    assign: (value & ASSIGN_MASK) === ASSIGN_MASK,
+    enable: (value & ENABLE_MASK) === ENABLE_MASK
   }
 }
 
-console.log(
-  'Admin permission',
+const admin_permission =
   CREATE_MASK |
-    READ_MASK |
-    UPDATE_MASK |
-    DELETE_MASK |
-    VERIFY_DOCUMENT_MASK |
-    IMPERSONATE_MASK |
-    ASSIGN_MASK |
-    SIGN_DOCUMENT_MASK
-)
+  READ_MASK |
+  UPDATE_MASK |
+  DELETE_MASK |
+  VERIFY_DOCUMENT_MASK |
+  ASSIGN_MASK |
+  SIGN_DOCUMENT_MASK |
+  ENABLE_MASK
 
-console.log(
-  'accountant permission',
-  CREATE_MASK | READ_MASK | UPDATE_MASK | DELETE_MASK | VERIFY_DOCUMENT_MASK | SIGN_DOCUMENT_MASK
-)
+console.log('Admin permission', admin_permission)
+console.log(calculatePermission(260))
 
-// console.log('User permission', CREATE_MASK | READ_MASK | UPDATE_MASK | VERIFY_DOCUMENT_MASK)
+export const FeatureRoleMapping: {
+  [key: string]: {
+    create: boolean
+    read: boolean
+    update: boolean
+    delete: boolean
+    verifyDocument: boolean
+    signDocument: boolean
+    assign: boolean
+    enable: boolean
+  }
+} = {
+  Admin: {
+    create: true,
+    read: true,
+    update: true,
+    delete: true,
+    verifyDocument: true,
+    signDocument: true,
+    assign: true,
+    enable: true
+  },
+  User: {
+    create: false,
+    read: true,
+    update: false,
+    delete: false,
+    verifyDocument: true,
+    signDocument: true,
+    assign: false,
+    enable: true
+  },
+  Accountant: {
+    create: false,
+    read: true,
+    update: false,
+    delete: false,
+    verifyDocument: true,
+    signDocument: true,
+    assign: false,
+    enable: true
+  },
+  Viewer: {
+    create: false,
+    read: true,
+    update: false,
+    delete: false,
+    verifyDocument: true,
+    signDocument: true,
+    assign: false,
+    enable: true
+  },
+  Certificant: {
+    create: false,
+    read: true,
+    update: false,
+    delete: false,
+    verifyDocument: true,
+    signDocument: true,
+    assign: false,
+    enable: true
+  },
+  Signer: {
+    create: false,
+    read: true,
+    update: false,
+    delete: false,
+    verifyDocument: true,
+    signDocument: true,
+    assign: false,
+    enable: true
+  }
+}
 
-// console.log('Certificant permission', CREATE_MASK | VERIFIDOCUMENT_MASK | READ_MASK)
+export enum Role {
+  Admin = 'Admin',
+  Manager = 'Manager',
+  Accountant = 'Accountant',
+  Viewer = 'Viewer',
+  Certificant = 'Certificant',
+  Signer = 'Signer'
+}
 
-// console.log('Viewer permission', READ_MASK)
+export const PermissionCode = {
+  create: 2,
+  read: 4,
+  update: 8,
+  delete: 16,
+  verifyDocument: 32,
+  signDocument: 64,
+  assign: 128,
+  enable: 256
+}
+export const DEFAULT_MASK = 0b111111111111
 
-// console.log('Admin permission', CREATE_MASK | READ_MASK | UPDATE_MASK | DELETE_MASK)
-// console.log('Admin permission', CREATE_MASK | READ_MASK | UPDATE_MASK | DELETE_MASK)
+const email_remind_sign: {
+  [key: string]: {
+    [key: string]: boolean
+  }
+} = {
+  Admin: { read: true, enable: true }, // 260
+  User: { read: true, enable: true },
+  Accountant: { read: true, enable: true },
+  Viewer: { read: true, enable: true },
+  Certificant: { read: true, enable: true },
+  Signer: { read: true, enable: true }
+}
 
-// console.log(CREATE_MASK | READ_MASK)
-// console.log(CREATE_MASK | IMPERSONATE_MASK)
+function calculatePermission1(role: string) {
+  const permRole = email_remind_sign[role]
+  console.log('>>', permRole)
+  let permission = 0
+  type PermKey = keyof typeof permRole
 
-// console.log(calculatePermission(1008))
-console.log(calculatePermission(784))
+  Object.keys(permRole).forEach((perm) => {
+    if (permRole[perm as keyof typeof permRole] === true) {
+      permission = permission | PermissionCode[perm as keyof typeof PermissionCode]
+    }
+  })
 
-// console.log(calculatePermission(60))
-// console.log(calculatePermission(48))
-// console.log(calculatePermission(34))
+  return permission
+}
+
+console.log(calculatePermission1('User'))

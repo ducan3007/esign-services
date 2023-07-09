@@ -15,6 +15,9 @@ async function bootstrap() {
   const httpAdapterHost = app.get(HttpAdapterHost)
   app.useGlobalFilters(new GlobalExceptionsFilter(httpAdapterHost))
 
+  // enable cors
+  app.enableCors()
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestJS')
     .setDescription('NestJS API Docs')

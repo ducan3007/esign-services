@@ -8,11 +8,11 @@ export type UserType = {
     name: string
     id: number
   }
-  permission?:UserPermission[]
+  permission?: UserPermission[]
   is_active?: boolean
   is_verified?: boolean
   is_master_group?: boolean
-  blockchain_address?: string
+  wallet_address?: any[]
   createdAt?: Date
   updatedAt?: Date
 }
@@ -27,8 +27,23 @@ export type UserPermission = {
 
 export enum Role {
   Admin = 'Admin',
-  Manager = 'Manager',
+  User = 'User',
   Accountant = 'Accountant',
   Viewer = 'Viewer',
-  Guest = 'Guest'
+  Certificant = 'Certificant',
+  Signer = 'Signer'
+}
+
+const default_feature_permission = {
+  Admin: {
+    create: true,
+    read: true,
+    update: true,
+    delete: true,
+    enable: true
+  },
+  Other: {
+    read: false,
+    enable: false
+  }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@esign-services/logger'
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Consumer, ConsumerRunConfig, ConsumerSubscribeTopic, Kafka, KafkaConfig } from 'kafkajs'
 
@@ -13,6 +14,9 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       brokers: ['localhost:9093']
     })
     this.kafkaAdmin = this.kafkaClient.admin()
+    logger.info('Kafka Service Initiated',{
+      brokers: ['localhost:9093']
+    })
   }
 
   onModuleDestroy() {

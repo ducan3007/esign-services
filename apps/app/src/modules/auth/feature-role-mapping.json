@@ -1,0 +1,8 @@
+{
+  "admin": {
+    "email_remind_sign": 510,
+    "document_cancel_sign_request": 510,
+    "document_reassign_sign_request": 510,
+    "certificate_change_owner": 510
+  }
+}

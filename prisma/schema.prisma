@@ -11,24 +11,51 @@ datasource db {
 }
 
 model user {
-  id                 String      @id @default(uuid())
-  email              String      @unique
-  first_name         String
-  last_name          String
-  avatar_url         String?
-  password           String
-  is_master_group    Boolean     @default(false)
-  blockchain_address String?
-  group_id           String?
-  is_verified        Boolean     @default(false)
-  is_active          Boolean     @default(true)
-  group              group?      @relation(fields: [group_id], references: [id])
-  updatedAt          DateTime    @default(now()) @updatedAt
-  createdAt          DateTime    @default(now())
-  user_role          user_role[]
+  id                   String                    @id @default(uuid())
+  email                String                    @unique
+  first_name           String
+  last_name            String
+  avatar_url           String?
+  password             String
+  is_master_group      Boolean                   @default(false)
+  group_id             String?
+  is_verified          Boolean                   @default(false)
+  is_active            Boolean                   @default(true)
+  group                group?                    @relation(fields: [group_id], references: [id])
+  updatedAt            DateTime                  @default(now()) @updatedAt
+  createdAt            DateTime                  @default(now())
+  user_role            user_role[]
+  user_feature         user_feature_permission[]
+  document             document[]
+  document_signer      document_signer[]
+  signature            signature[]
+  audit_log            audit_log[]
+  // email_user_mapping   email_user_mapping[]
+  certificate_user     certificate_user[]
+  certificate_template certificate_template[]
+  email_template       email_template[]
+  wallet               wallet[]
 }
 
-// [Adimn , Viewer, Accountant, Manager]
+model wallet {
+  id         String   @id @default(uuid())
+  public_key String
+  user_id    String?
+  user       user?    @relation(fields: [user_id], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+enum UserRole {
+  Admin
+  User
+  Accountant
+  Viewer
+  Certificant
+  Signer
+}
+
+// [Admin , Viewer, Accountant, Manager, Certificant, New]
 model role {
   id                       Int                        @id @default(autoincrement())
   name                     String                     @unique
@@ -39,23 +66,39 @@ model role {
   user_role                user_role[]
 }
 
-// [User, Document, Sign Document, Certificate, Sign Template, Group ]
-model feature {
+// [User Management, Document, Certificate,  Signature Template, Group, Email Template]
+model resource {
   id                       Int                        @id @default(autoincrement())
   name                     String                     @unique
   description              String?
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @default(now()) @updatedAt
   role_resource_permission role_resource_permission[]
 }
 
+// Sign Document, Sign Certificate, Notification
 model role_resource_permission {
   id            Int       @id @default(autoincrement())
   role_id       Int?
   resource_id   Int?
   permission_id Int?
   role          role?     @relation(fields: [role_id], references: [id])
-  feature      feature? @relation(fields: [resource_id], references: [id])
+  resource      resource? @relation(fields: [resource_id], references: [id])
+}
+
+// [Sign Document, Sig Certificate, Reminder, Notification, Audit Log, Settings]
+model feature {
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @unique
+  description             String?
+  user_feature_permission user_feature_permission[]
+}
+
+model user_feature_permission {
+  id            String   @id @default(uuid())
+  user_id       String?
+  feature_id    Int?
+  permission_id Int?
+  user          user?    @relation(fields: [user_id], references: [id])
+  feature       feature? @relation(fields: [feature_id], references: [id])
 }
 
 model user_role {
@@ -67,11 +110,147 @@ model user_role {
 }
 
 model group {
+  id                   String                 @id @default(uuid())
+  name                 String
+  description          String?
+  group_master         String?
+  users                user[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  document             document[]
+  // email_user_mapping   email_user_mapping[]
+  certificate_template certificate_template[]
+  email_template       email_template[]
+}
+
+model certificate_user {
+  id                String         @id @default(uuid())
+  name              String
+  description       String?
+  status            DocumentStatus
+  hash256           String
+  cid               String?
+  certificant_id    String?
+  certificant_email String?
+  issuer_id         String?
+  user              user?          @relation(fields: [certificant_id], references: [id])
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @default(now()) @updatedAt
+}
+
+model certificate_template {
+  id        String   @id @default(uuid())
+  name      String
+  cid       String?
+  group_id  String?
+  user_id   String?
+  user      user?    @relation(fields: [user_id], references: [id])
+  group     group?   @relation(fields: [group_id], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum DocumentStatus {
+  PENDING
+  READYTOSIGN
+  SIGNED
+  CANCLED
+
+  AVAILABLE
+  REJECTED
+  REVOKED
+  EXPIRED
+}
+
+model document {
+  id              String            @id @default(uuid())
+  name            String
+  description     String?
+  hash256         String
+  cid             String?
+  status          DocumentStatus
+  group_id        String?
+  user_id         String?
+  user_email      String?
+  user            user?             @relation(fields: [user_id], references: [id])
+  group           group?            @relation(fields: [group_id], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  document_signer document_signer[]
+}
+
+model document_signer {
+  id             String     @id @default(uuid())
+  document_id    String?
+  signer_id      String?
+  signer_email   String?
+  signer_address String?
+  signature_id   String?
+  is_signed      Boolean    @default(false)
+  is_cancel      Boolean    @default(false)
+  user           user?      @relation(fields: [signer_id], references: [id])
+  document       document?  @relation(fields: [document_id], references: [id])
+  signature      signature? @relation(fields: [signature_id], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now()) @updatedAt
+}
+
+model signature {
+  id              String            @id @default(uuid())
+  user_id         String?
+  user_email      String?
+  siganture_hash  String
+  signature       String
+  user            user?             @relation(fields: [user_id], references: [id])
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  document_signer document_signer[]
+}
+
+model email_template {
   id          String   @id @default(uuid())
   name        String
   description String?
-  master_id   String?
-  users       user[]
+  subject     String
+  body        String
+  user_id     String?
+  group_id    String?
+  user        user?    @relation(fields: [user_id], references: [id])
+  group       group?   @relation(fields: [group_id], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  // email_user_mapping email_user_mapping[]
+}
+
+// model email_user_mapping {
+//   id               String          @id @default(uuid())
+//   email_template   email_template? @relation(fields: [email_templateId], references: [id])
+//   user             user?           @relation(fields: [userId], references: [id])
+//   group            group?          @relation(fields: [groupId], references: [id])
+//   createdAt        DateTime        @default(now())
+//   updatedAt        DateTime        @default(now()) @updatedAt
+//   email_templateId String?
+//   userId           String?
+//   groupId          String?
+// }
+
+model transaction {
+  id        String   @id @default(uuid())
+  from      String
+  to        String
+  tx_hash   String
+  content   String?
+  amount    Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model audit_log {
+  id          String   @id @default(uuid())
+  user_id     String?
+  user_email  String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  user        user?    @relation(fields: [user_id], references: [id])
 }
